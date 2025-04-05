@@ -2,7 +2,7 @@ import { countCompletedTodos } from './getNumberOfCompletedTodos';
 
 describe('The countCompletedTodos function', () => {
   describe('When provided with valid array of todos', () => {
-    let array = [
+    const array = [
       { title: 'Buy milk', completed: true },
       { title: 'Walk dog', completed: false },
       { title: 'Write code', completed: true },
