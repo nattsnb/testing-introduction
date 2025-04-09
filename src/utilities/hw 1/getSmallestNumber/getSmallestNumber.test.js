@@ -2,10 +2,11 @@ import { getSmallestNumber } from './getSmallestNumber';
 
 describe('The getSmallestNumber function', () => {
   describe('when correct array is passed as argument', () => {
-    const array = [5, 7, -9, 0, 65, 134];
+    const smallestNumber = -9;
+    const array = [5, 7, smallestNumber, 0, 65, 134];
     it('should return lowest value', () => {
       const result = getSmallestNumber(array);
-      expect(result).toBe(-9);
+      expect(result).toBe(smallestNumber);
     });
   });
 
