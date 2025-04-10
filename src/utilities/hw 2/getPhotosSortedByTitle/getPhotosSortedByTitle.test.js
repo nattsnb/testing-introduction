@@ -7,37 +7,32 @@ jest.mock('./getPhotos', () => ({
 }));
 
 describe('The getPhotosSortedByTitle function', () => {
-  describe('basic behaviour', () => {
-    it('should call the getPhotos function', async () => {
-      getPhotos.mockResolvedValue([]);
-      await getPhotosSortedByTitle();
-      expect(getPhotos).toHaveBeenCalled();
-    });
+  it('should call the getPhotos function', async () => {
+    await getPhotosSortedByTitle();
+    expect(getPhotos).toHaveBeenCalled();
   });
 
   describe('when photos array is correctly fetched in getPhotos', () => {
-    const sortedArray = [
-      { id: 2, title: 'A Photo', url: 'url-a' },
+    const photosArray = [
       { id: 1, title: 'B Photo', url: 'url-b' },
+      { id: 2, title: 'A Photo', url: 'url-a' },
       { id: 3, title: 'C Photo', url: 'url-c' },
     ];
+    const sortedPhotosArray = [photosArray[1], photosArray[0], photosArray[2]];
 
     it('should return properly sorted array', async () => {
-      getPhotos.mockResolvedValue([
-        { id: 1, title: 'B Photo', url: 'url-b' },
-        { id: 2, title: 'A Photo', url: 'url-a' },
-        { id: 3, title: 'C Photo', url: 'url-c' },
-      ]);
+      getPhotos.mockResolvedValue(sortedPhotosArray);
       const result = await getPhotosSortedByTitle();
-      expect(result).toEqual(sortedArray);
+      expect(result).toEqual(sortedPhotosArray);
     });
   });
 
-  describe('when photos array is incorrectly fetched in getPhotos', () => {
+  describe('when getPhotos throws an error', () => {
     it('should throw new error with correct message', async () => {
-      getPhotos.mockRejectedValue(new Error('Failed to fetch photos.'));
+      const photosErrorMessage = 'Failed to fetch photos';
+      getPhotos.mockRejectedValue(new Error(photosErrorMessage));
       await expect(getPhotosSortedByTitle()).rejects.toThrow(
-        Error('Failed to fetch photos.'),
+        Error(photosErrorMessage),
       );
     });
   });

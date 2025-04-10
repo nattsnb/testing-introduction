@@ -7,37 +7,33 @@ jest.mock('./getAlbums', () => ({
 }));
 
 describe('The getAlbumsSortedByTitle function', () => {
-  describe('basic behaviour', () => {
-    it('should call the getAlbums function', async () => {
-      getAlbums.mockResolvedValue([]);
-      await getAlbumsSortedByTitle();
-      expect(getAlbums).toHaveBeenCalled();
-    });
+  it('should call the getAlbums function', async () => {
+    await getAlbumsSortedByTitle();
+    expect(getAlbums).toHaveBeenCalled();
   });
 
   describe('when albums array is correctly fetched in getAlbums', () => {
-    const sortedArray = [
-      { id: 2, title: 'A Album' },
+    const albumsArray = [
       { id: 1, title: 'B Album' },
+      { id: 2, title: 'A Album' },
       { id: 3, title: 'C Album' },
     ];
 
+    const sortedAlbumsArray = [albumsArray[1], albumsArray[0], albumsArray[2]];
+
     it('should return properly sorted array', async () => {
-      getAlbums.mockResolvedValue([
-        { id: 1, title: 'B Album' },
-        { id: 2, title: 'A Album' },
-        { id: 3, title: 'C Album' },
-      ]);
+      getAlbums.mockResolvedValue(sortedAlbumsArray);
       const result = await getAlbumsSortedByTitle();
-      expect(result).toEqual(sortedArray);
+      expect(result).toEqual(sortedAlbumsArray);
     });
   });
 
-  describe('when albums array is incorrectly fetched in getAlbums', () => {
+  describe('when getAlbums throws an error', () => {
     it('should throw new error with correct message', async () => {
-      getAlbums.mockRejectedValue(new Error('Failed to fetch albums.'));
+      const albumsErrorMessage = 'Failed to fetch albums';
+      getAlbums.mockRejectedValue(new Error(albumsErrorMessage));
       await expect(getAlbumsSortedByTitle()).rejects.toThrow(
-        Error('Failed to fetch albums.'),
+        Error(albumsErrorMessage),
       );
     });
   });

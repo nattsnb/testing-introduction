@@ -15,65 +15,54 @@ jest.mock('../../lesson 2/getPostsSortedByTitle/getPosts', () => ({
 }));
 
 describe('The getUsersWithPosts function', () => {
-  describe('basic behaviour', () => {
-    it('should call the getUsers function', async () => {
-      getUsers.mockResolvedValue([]);
-      getPosts.mockResolvedValue([]);
-      await getUsersWithPosts();
-      expect(getUsers).toHaveBeenCalled();
-    });
-    it('should call the getPosts function', async () => {
-      getUsers.mockResolvedValue([]);
-      getPosts.mockResolvedValue([]);
-      await getUsersWithPosts();
-      expect(getPosts).toHaveBeenCalled();
-    });
+  beforeEach(() => {
+    getPosts.mockResolvedValue([]);
+    getUsers.mockResolvedValue([]);
   });
+
+  it('should call both getUsers and getPosts functions', async () => {
+    await getUsersWithPosts();
+    expect(getUsers).toHaveBeenCalled();
+    expect(getPosts).toHaveBeenCalled();
+  });
+
   describe('when both fetches succeeded', () => {
-    const arrangedArray = [
+    const fetchedPosts = [
+      { id: 101, userId: 1, title: 'Post 1' },
+      { id: 102, userId: 1, title: 'Post 2' },
+      { id: 201, userId: 2, title: 'Post 3' },
+    ];
+    const fetchedUsers = [
+      { id: 1, name: 'Alice' },
+      { id: 2, name: 'Bob' },
+    ];
+    const usersWithPostsArray = [
       {
-        id: 1,
-        name: 'Alice',
-        posts: [
-          { id: 101, userId: 1, title: 'Post 1' },
-          { id: 102, userId: 1, title: 'Post 2' },
-        ],
+        ...fetchedUsers[0],
+        posts: [fetchedPosts[0], fetchedPosts[1]],
       },
       {
-        id: 2,
-        name: 'Bob',
-        posts: [{ id: 201, userId: 2, title: 'Post 3' }],
+        ...fetchedUsers[1],
+        posts: [fetchedPosts[2]],
       },
     ];
     it('should return correctly arranged array', async () => {
-      getUsers.mockResolvedValue([
-        { id: 1, name: 'Alice' },
-        { id: 2, name: 'Bob' },
-      ]);
-      getPosts.mockResolvedValue([
-        { id: 101, userId: 1, title: 'Post 1' },
-        { id: 102, userId: 1, title: 'Post 2' },
-        { id: 201, userId: 2, title: 'Post 3' },
-      ]);
+      getUsers.mockResolvedValue(fetchedUsers);
+      getPosts.mockResolvedValue(fetchedPosts);
       const result = await getUsersWithPosts();
-      expect(result).toEqual(arrangedArray);
+      expect(result).toEqual(usersWithPostsArray);
     });
   });
-  describe('when either fetch fails', () => {
-    it('should throw error when getUsers fails', async () => {
-      getUsers.mockRejectedValue(new Error('Failed to fetch users'));
-      getPosts.mockResolvedValue([]);
-      await expect(getUsersWithPosts()).rejects.toThrow(
-        'Failed to fetch users',
-      );
-    });
 
-    it('should throw error when getPosts fails', async () => {
-      getUsers.mockResolvedValue([]);
-      getPosts.mockRejectedValue(new Error('Failed to fetch posts'));
-      await expect(getUsersWithPosts()).rejects.toThrow(
-        'Failed to fetch posts',
-      );
-    });
+  it('should throw error when getUsers fails', async () => {
+    const usersErrorMessage = 'Failed to fetch users';
+    getUsers.mockRejectedValue(new Error(usersErrorMessage));
+    await expect(getUsersWithPosts()).rejects.toThrow(usersErrorMessage);
+  });
+
+  it('should throw error when getPosts fails', async () => {
+    const postsErrorMessage = 'Failed to fetch posts';
+    getPosts.mockRejectedValue(new Error(postsErrorMessage));
+    await expect(getUsersWithPosts()).rejects.toThrow(postsErrorMessage);
   });
 });

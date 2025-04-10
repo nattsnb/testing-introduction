@@ -13,73 +13,57 @@ jest.mock('../getPhotosSortedByTitle/getPhotos', () => ({
 }));
 
 describe('The getAlbumsWithPhotos function', () => {
-  describe('basic behaviour', () => {
-    it('should call the getAlbums function', async () => {
-      getAlbums.mockResolvedValue([]);
-      getPhotos.mockResolvedValue([]);
-      await getAlbumsWithPhotos();
-      expect(getAlbums).toHaveBeenCalled();
-    });
-
-    it('should call the getPhotos function', async () => {
-      getAlbums.mockResolvedValue([]);
-      getPhotos.mockResolvedValue([]);
-      await getAlbumsWithPhotos();
-      expect(getPhotos).toHaveBeenCalled();
-    });
+  beforeEach(() => {
+    getPhotos.mockResolvedValue([]);
+    getAlbums.mockResolvedValue([]);
+  });
+  it('should call both getAlbums and getPhotos functions', async () => {
+    await getAlbumsWithPhotos();
+    expect(getAlbums).toHaveBeenCalled();
+    expect(getPhotos).toHaveBeenCalled();
   });
 
   describe('when both fetches succeeded', () => {
-    const arrangedArray = [
+    const fetchedAlbums = [
+      { id: 1, title: 'Album 1' },
+      { id: 2, title: 'Album 2' },
+    ];
+    const fetchedPhotos = [
+      { id: 101, albumId: 1, title: 'Photo 1' },
+      { id: 102, albumId: 1, title: 'Photo 2' },
+      { id: 201, albumId: 2, title: 'Photo 3' },
+    ];
+    const albumsWithPhotosArray = [
       {
-        id: 1,
-        title: 'Album 1',
-        photos: [
-          { id: 101, albumId: 1, title: 'Photo 1' },
-          { id: 102, albumId: 1, title: 'Photo 2' },
-        ],
+        ...fetchedAlbums[0],
+        photos: [fetchedPhotos[0], fetchedPhotos[1]],
       },
       {
-        id: 2,
-        title: 'Album 2',
-        photos: [{ id: 201, albumId: 2, title: 'Photo 3' }],
+        ...fetchedAlbums[1],
+        photos: [fetchedPhotos[2]],
       },
     ];
 
     it('should return correctly arranged array', async () => {
-      getAlbums.mockResolvedValue([
-        { id: 1, title: 'Album 1' },
-        { id: 2, title: 'Album 2' },
-      ]);
-
-      getPhotos.mockResolvedValue([
-        { id: 101, albumId: 1, title: 'Photo 1' },
-        { id: 102, albumId: 1, title: 'Photo 2' },
-        { id: 201, albumId: 2, title: 'Photo 3' },
-      ]);
+      getAlbums.mockResolvedValue(fetchedAlbums);
+      getPhotos.mockResolvedValue(fetchedPhotos);
 
       const result = await getAlbumsWithPhotos();
-      expect(result).toEqual(arrangedArray);
+      expect(result).toEqual(albumsWithPhotosArray);
     });
   });
 
-  describe('when either fetch fails', () => {
-    it('should throw error when getAlbums fails', async () => {
-      getAlbums.mockRejectedValue(new Error('Failed to fetch albums'));
-      getPhotos.mockResolvedValue([]);
+  it('should throw error when getAlbums fails', async () => {
+    const albumsErrorMessage = 'Failed to fetch albums';
 
-      await expect(getAlbumsWithPhotos()).rejects.toThrow(
-        'Failed to fetch albums',
-      );
-    });
+    getAlbums.mockRejectedValue(new Error(albumsErrorMessage));
+    await expect(getAlbumsWithPhotos()).rejects.toThrow(albumsErrorMessage);
+  });
 
-    it('should throw error when getPhotos fails', async () => {
-      getAlbums.mockResolvedValue([]);
-      getPhotos.mockRejectedValue(new Error('Failed to fetch photos'));
+  it('should throw error when getPhotos fails', async () => {
+    const photosErrorMessage = 'Failed to fetch photos';
 
-      await expect(getAlbumsWithPhotos()).rejects.toThrow(
-        'Failed to fetch photos',
-      );
-    });
+    getPhotos.mockRejectedValue(new Error(photosErrorMessage));
+    await expect(getAlbumsWithPhotos()).rejects.toThrow(photosErrorMessage);
   });
 });
